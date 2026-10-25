@@ -1,0 +1,5 @@
+Sorry about that. What were you doing right before the export failed?
+
+```json
+{"state_hint": "ask_more", "extracted": {"kind_hint": "bug", "actual": "export failed with an error"}}
+```
