@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update tickets\n           set title = $2, summary = $3, kind = $4, severity = $5,\n               fields_json = fields_json || $6\n           where id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "27607eeccf1577bf43bba6947837bb4de209e0ea1a1fac937140b08fd3f7254b"
+}

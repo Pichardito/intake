@@ -330,6 +330,79 @@ pub async fn fts_candidates(
     Ok(rows.into_iter().map(|r| TicketStub { id: r.id, title: r.title, summary: r.summary }).collect())
 }
 
+/// Like [`fts_candidates`] but with the status and issue URL the console shows, and
+/// excluding the ticket itself.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct CandidateRow {
+    pub id: i64,
+    pub title: String,
+    pub summary: String,
+    pub status: String,
+    pub github_issue_url: Option<String>,
+}
+
+pub async fn fts_candidate_rows(
+    pool: &PgPool,
+    site_id: i64,
+    exclude_id: i64,
+    terms: &[String],
+    limit: i64,
+) -> sqlx::Result<Vec<CandidateRow>> {
+    let safe: Vec<&str> = terms
+        .iter()
+        .map(String::as_str)
+        .filter(|t| t.chars().all(char::is_alphanumeric) && !t.is_empty())
+        .collect();
+    if safe.is_empty() {
+        return Ok(vec![]);
+    }
+    let query = safe.join(" | ");
+    let rows = sqlx::query!(
+        r#"select id, title, summary, status, github_issue_url
+           from tickets
+           where site_id = $1 and id <> $4 and status in ('draft', 'approved', 'merged')
+             and fts @@ to_tsquery('english', $2)
+           order by ts_rank(fts, to_tsquery('english', $2)) desc, id desc
+           limit $3"#,
+        site_id,
+        query,
+        limit,
+        exclude_id
+    )
+    .fetch_all(pool)
+    .await?;
+    Ok(rows
+        .into_iter()
+        .map(|r| CandidateRow {
+            id: r.id,
+            title: r.title,
+            summary: r.summary,
+            status: r.status,
+            github_issue_url: r.github_issue_url,
+        })
+        .collect())
+}
+
+/// Persist the owner's edits to a draft's triage fields (made in the console before approval).
+pub async fn update_ticket_fields(pool: &PgPool, t: &TicketRow) -> sqlx::Result<()> {
+    let fields = serde_json::json!({ "steps": t.steps, "expected": t.expected, "actual": t.actual });
+    sqlx::query!(
+        r#"update tickets
+           set title = $2, summary = $3, kind = $4, severity = $5,
+               fields_json = fields_json || $6
+           where id = $1"#,
+        t.id,
+        t.title,
+        t.summary,
+        t.kind.as_str(),
+        t.severity.as_str(),
+        fields
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
 pub async fn insert_draft_ticket(
     pool: &PgPool,
     site_id: i64,

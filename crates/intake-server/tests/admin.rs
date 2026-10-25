@@ -156,7 +156,8 @@ async fn admin_routes_need_a_session_for_the_right_login(pool: PgPool) {
     assert_eq!(t.send(other).await.status, StatusCode::FORBIDDEN);
     let ok = t.send(t.admin_req("GET", "/admin/tickets", None)).await;
     assert_eq!(ok.status, StatusCode::OK);
-    assert_eq!(ok.json, json!([]));
+    assert_eq!(ok.json["tickets"], json!([]));
+    assert_eq!(ok.json["sites"].as_array().unwrap().len(), 1);
 }
 
 #[sqlx::test(migrator = "intake_server::MIGRATOR")]
@@ -166,17 +167,26 @@ async fn approve_creates_the_issue_once(pool: PgPool) {
 
     let list =
         t.send(t.admin_req("GET", &format!("/admin/tickets?site={}&status=draft", t.site_id), None)).await;
-    assert_eq!(list.json.as_array().unwrap().len(), 1);
+    assert_eq!(list.json["tickets"].as_array().unwrap().len(), 1);
+    let other = seed_draft(&t, "CSV export fails on invoices").await;
     let detail = t.send(t.admin_req("GET", &format!("/admin/tickets/{id}"), None)).await;
     assert_eq!(detail.status, StatusCode::OK);
     assert_eq!(detail.json["ticket"]["kind"], "bug");
     assert_eq!(detail.json["transcript"].as_array().unwrap().len(), 2);
     assert_eq!(detail.json["conversation"]["page_url"], "https://example.test/app");
+    let dups = detail.json["duplicates"].as_array().unwrap();
+    assert_eq!(dups.len(), 1, "{dups:?}");
+    assert_eq!(dups[0]["id"].as_i64(), Some(other));
+    assert_eq!(dups[0]["status"], "draft");
+    assert!(dups[0]["score"].as_f64().unwrap() > 0.5);
+    assert!(dups[0]["github_issue_url"].is_null());
 
     Mock::given(method("POST"))
         .and(path(format!("/repos/{REPO}/issues")))
         .and(hdr("authorization", "Bearer ghp_test"))
-        .and(body_partial_json(json!({"title": "[bug] CSV export fails", "labels": ["intake", "bug"]})))
+        .and(body_partial_json(
+            json!({"title": "[bug] CSV export fails (edited)", "labels": ["intake", "bug"]}),
+        ))
         .respond_with(
             ResponseTemplate::new(201)
                 .set_body_json(json!({"html_url": "https://github.com/owner/repo/issues/42", "number": 42})),
@@ -185,14 +195,31 @@ async fn approve_creates_the_issue_once(pool: PgPool) {
         .mount(&t.github)
         .await;
 
-    let r = t.send(t.admin_req("POST", &format!("/admin/tickets/{id}/approve"), Some(&json!({})))).await;
+    // Unknown edit keys are rejected before anything happens.
+    let bad = t
+        .send(t.admin_req(
+            "POST",
+            &format!("/admin/tickets/{id}/approve"),
+            Some(&json!({"fields": {"action": "open_pr"}})),
+        ))
+        .await;
+    assert_eq!(bad.status, StatusCode::UNPROCESSABLE_ENTITY, "{:?}", bad.json);
+
+    let edits = json!({"fields": {"title": "CSV export fails (edited)", "severity": "high", "steps": ["Open Invoices", "Export"]}});
+    let r = t.send(t.admin_req("POST", &format!("/admin/tickets/{id}/approve"), Some(&edits))).await;
     assert_eq!(r.status, StatusCode::OK, "{:?}", r.json);
     assert_eq!(r.json["github_issue_url"], "https://github.com/owner/repo/issues/42");
-    let row = sqlx::query!("select status, github_issue_url, decided_at from tickets where id = $1", id)
-        .fetch_one(&pool)
-        .await
-        .unwrap();
+    let row = sqlx::query!(
+        "select status, github_issue_url, decided_at, title, severity, fields_json from tickets where id = $1",
+        id
+    )
+    .fetch_one(&pool)
+    .await
+    .unwrap();
     assert_eq!(row.status, "approved");
+    assert_eq!((row.title.as_str(), row.severity.as_str()), ("CSV export fails (edited)", "high"));
+    assert_eq!(row.fields_json["steps"], json!(["Open Invoices", "Export"]));
+    assert_eq!(row.fields_json["extracted"]["kind_hint"], "bug", "untouched keys survive the merge");
     assert_eq!(row.github_issue_url.as_deref(), Some("https://github.com/owner/repo/issues/42"));
     assert!(row.decided_at.is_some());
 

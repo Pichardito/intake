@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select status, github_issue_url, decided_at, title, severity, fields_json from tickets where id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "github_issue_url",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "github_issue_url"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "decided_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "decided_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "severity",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "severity"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "fields_json",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "fields_json"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "b2baff306e3205d5a5d812bdc2617fdb8def06d74ec83b4056bc6e79557c097c"
+}

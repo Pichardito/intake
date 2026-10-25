@@ -30,13 +30,13 @@ async fn three_turns_then_draft_ticket(pool: PgPool) {
     let (id, token) = t.start().await;
     let r1 = t.message(&id, &token, "the export is broken").await;
     assert_eq!(r1.status, StatusCode::OK, "{:?}", r1.json);
-    assert_eq!(r1.json["state"], json!({"state": "clarifying", "asked": 1}));
+    assert_eq!((r1.json["state"].as_str(), r1.json["asked"].as_u64()), (Some("clarifying"), Some(1)));
     assert_eq!(r1.json["done"], false);
     let r2 = t.message(&id, &token, "I was exporting invoices").await;
-    assert_eq!(r2.json["state"], json!({"state": "clarifying", "asked": 2}));
+    assert_eq!((r2.json["state"].as_str(), r2.json["asked"].as_u64()), (Some("clarifying"), Some(2)));
     let r3 = t.message(&id, &token, "I expected a CSV download").await;
     assert_eq!(r3.status, StatusCode::OK, "{:?}", r3.json);
-    assert_eq!(r3.json["state"], json!({"state": "triaged"}));
+    assert_eq!(r3.json["state"], "triaged");
     assert_eq!(r3.json["done"], true);
     let ticket_id = r3.json["ticket_id"].as_i64().expect("ticket id");
 
@@ -109,14 +109,14 @@ async fn persona_is_capped_at_three_questions(pool: PgPool) {
         for i in 0..4 {
             let r = t.message(&id, &token, &format!("message {i}")).await;
             assert_eq!(r.status, StatusCode::OK, "{:?}", r.json);
-            v.push(r.json["state"].clone());
+            v.push((r.json["state"].as_str().unwrap().to_string(), r.json["asked"].as_u64().unwrap()));
         }
         v
     };
-    assert_eq!(states[0], json!({"state": "clarifying", "asked": 1}));
-    assert_eq!(states[1], json!({"state": "clarifying", "asked": 2}));
-    assert_eq!(states[2], json!({"state": "clarifying", "asked": 3}));
-    assert_eq!(states[3], json!({"state": "triaged"}));
+    assert_eq!(states[0], ("clarifying".to_string(), 1));
+    assert_eq!(states[1], ("clarifying".to_string(), 2));
+    assert_eq!(states[2], ("clarifying".to_string(), 3));
+    assert_eq!(states[3], ("triaged".to_string(), 0));
     let purposes: Vec<_> = t.model.requests().iter().map(|r| r.purpose).collect();
     assert_eq!(purposes, ["persona", "persona", "persona", "persona", "triage"]);
     let n = sqlx::query_scalar!(r#"select count(*) as "n!" from tickets"#).fetch_one(&pool).await.unwrap();
@@ -134,7 +134,7 @@ async fn end_runs_triage_and_empty_end_makes_no_ticket(pool: PgPool) {
     let e = t.end(&id, &token).await;
     assert_eq!(e.status, StatusCode::OK, "{:?}", e.json);
     assert!(e.json["ticket_id"].is_i64());
-    assert_eq!(e.json["state"], json!({"state": "triaged"}));
+    assert_eq!(e.json["state"], "triaged");
 
     // end with no messages
     let (id2, token2) = t.start().await;

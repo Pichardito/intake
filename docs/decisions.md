@@ -74,6 +74,18 @@ had to choose.
     12-case corpus from one address correctly tripped the 10/min start bucket. The limiter was
     right; the test was the client.
 
+22. **API contract aligned with the widget/console PR (#1).** Public `state` is the bare label
+    `open|clarifying|closing|triaged` with the question count as a sibling `asked`; message
+    responses also carry `done` and `ticket_id` (the widget's reference id is
+    `ticket_id ?? conversation id`). `GET /admin/tickets` returns `{tickets, sites}`;
+    `GET /admin/tickets/{id}` returns `transcript[]` and `duplicates[] {id, title, status,
+    github_issue_url, score}` (FTS over the ticket's own words, scored by the same Jaccard the
+    triage uses, the recorded `duplicate_of` always included); `POST …/approve {fields}` takes
+    the owner's edited triage fields (`deny_unknown_fields`), persists them, and builds the
+    issue from the edited values. `/admin/logout` is POST. The server auto-triages when the
+    state machine reaches `closing`, so the widget's `end` call on `closing|triaged` is
+    idempotent and returns the same ticket id.
+
 ### Left out of this PR (and why)
 
 - **Retention job** (90-day conversation purge): needs a decision on where it runs (Fly cron
