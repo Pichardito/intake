@@ -1,0 +1,25 @@
+// @ts-check
+import js from "@eslint/js";
+import reactHooks from "eslint-plugin-react-hooks";
+import globals from "globals";
+import tseslint from "typescript-eslint";
+
+export default tseslint.config(
+  { ignores: ["dist/**", "node_modules/**"] },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
+    files: ["src/**/*.{ts,tsx}", "test/**/*.{ts,tsx}"],
+    plugins: { "react-hooks": reactHooks },
+    languageOptions: { globals: { ...globals.browser } },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      "@typescript-eslint/consistent-type-imports": "error",
+      "no-console": ["error", { allow: ["warn", "error"] }],
+    },
+  },
+  {
+    files: ["e2e/**/*.mjs"],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
+);
