@@ -6,6 +6,7 @@ use axum::http::request::Parts;
 use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
 use axum::response::{IntoResponse, Redirect, Response};
 use axum::Json;
+use intake_core::{rank_duplicates, Kind, Severity, TicketStub, Triage};
 use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
@@ -127,7 +128,9 @@ pub async fn list_tickets(
     Query(f): Query<TicketFilter>,
 ) -> AppResult<impl IntoResponse> {
     let limit = f.limit.unwrap_or(200).clamp(1, 1000);
-    Ok(Json(db::list_tickets(&state.pool, f.site, f.status.as_deref(), limit).await?))
+    let tickets = db::list_tickets(&state.pool, f.site, f.status.as_deref(), limit).await?;
+    let sites = db::list_sites(&state.pool).await?;
+    Ok(Json(json!({ "tickets": tickets, "sites": sites })))
 }
 
 pub async fn get_ticket(
@@ -148,42 +151,133 @@ pub async fn get_ticket(
         }
         None => (vec![], None),
     };
-    let duplicate = match ticket.duplicate_of {
-        Some(d) => db::get_ticket(&state.pool, d).await?,
-        None => None,
-    };
+    let duplicates = duplicates_for(&state, &ticket).await?;
     let audit = db::audit_for(&state.pool, &format!("ticket:{id}")).await?;
     Ok(Json(json!({
         "ticket": ticket, "transcript": transcript, "conversation": conversation,
-        "duplicate": duplicate, "audit": audit,
+        "duplicates": duplicates, "audit": audit,
     })))
 }
 
+/// Candidate duplicates for the console: FTS over the ticket's own words, scored by the same
+/// Jaccard the triage step uses, with the ticket's recorded `duplicate_of` always included.
+async fn duplicates_for(state: &AppState, ticket: &db::TicketRow) -> AppResult<Vec<serde_json::Value>> {
+    let mut terms: Vec<String> =
+        intake_core::dedup::tokens(&format!("{} {}", ticket.title, ticket.summary)).into_iter().collect();
+    terms.sort();
+    terms.truncate(24);
+    let mut rows = db::fts_candidate_rows(&state.pool, ticket.site_id, ticket.id, &terms, 20).await?;
+    if let Some(d) = ticket.duplicate_of {
+        if !rows.iter().any(|r| r.id == d) {
+            if let Some(t) = db::get_ticket(&state.pool, d).await? {
+                rows.push(db::CandidateRow {
+                    id: t.id,
+                    title: t.title,
+                    summary: t.summary,
+                    status: t.status,
+                    github_issue_url: t.github_issue_url,
+                });
+            }
+        }
+    }
+    let stubs: Vec<TicketStub> = rows
+        .iter()
+        .map(|r| TicketStub { id: r.id, title: r.title.clone(), summary: r.summary.clone() })
+        .collect();
+    let as_triage = Triage {
+        kind: ticket.kind,
+        title: ticket.title.clone(),
+        summary: ticket.summary.clone(),
+        steps: vec![],
+        expected: None,
+        actual: None,
+        severity: ticket.severity,
+        confidence: ticket.confidence,
+        duplicate_of: ticket.duplicate_of,
+    };
+    let ranked = rank_duplicates(&stubs, &as_triage);
+    Ok(ranked
+        .into_iter()
+        .filter_map(|(id, score)| {
+            let r = rows.iter().find(|r| r.id == id)?;
+            Some(json!({
+                "id": r.id, "title": r.title, "status": r.status,
+                "github_issue_url": r.github_issue_url, "score": score,
+            }))
+        })
+        .collect())
+}
+
+/// The owner's edited triage fields, all optional; unknown keys are rejected.
 #[derive(Deserialize, Default)]
-pub struct ApproveBody {
-    /// Optional edits made in the console before approval.
+#[serde(deny_unknown_fields)]
+pub struct TicketEdits {
+    #[serde(default)]
+    pub kind: Option<Kind>,
     #[serde(default)]
     pub title: Option<String>,
     #[serde(default)]
     pub summary: Option<String>,
+    #[serde(default)]
+    pub steps: Option<Vec<String>>,
+    #[serde(default)]
+    pub expected: Option<String>,
+    #[serde(default)]
+    pub actual: Option<String>,
+    #[serde(default)]
+    pub severity: Option<Severity>,
+}
+
+#[derive(Deserialize, Default)]
+pub struct ApproveBody {
+    /// `{ "fields": { … } }` — edits made in the console before approval.
+    #[serde(default)]
+    pub fields: TicketEdits,
 }
 
 pub async fn approve(
     Admin(session): Admin,
     State(state): State<AppState>,
     Path(id): Path<i64>,
-    body: Option<Json<ApproveBody>>,
+    Json(body): Json<ApproveBody>,
 ) -> AppResult<impl IntoResponse> {
-    let edits = body.map(|b| b.0).unwrap_or_default();
+    let edits = body.fields;
     let mut ticket = db::get_ticket(&state.pool, id).await?.ok_or(AppError::NotFound)?;
     if ticket.status != "draft" {
         return Err(AppError::Conflict(format!("ticket is already {}", ticket.status)));
     }
-    if let Some(t) = edits.title.filter(|t| !t.trim().is_empty()) {
+    let non_empty = |s: Option<String>| s.filter(|s| !s.trim().is_empty());
+    let mut edited = false;
+    if let Some(t) = non_empty(edits.title) {
         ticket.title = t;
+        edited = true;
     }
-    if let Some(s) = edits.summary.filter(|s| !s.trim().is_empty()) {
+    if let Some(s) = non_empty(edits.summary) {
         ticket.summary = s;
+        edited = true;
+    }
+    if let Some(k) = edits.kind {
+        ticket.kind = k;
+        edited = true;
+    }
+    if let Some(sev) = edits.severity {
+        ticket.severity = sev;
+        edited = true;
+    }
+    if let Some(steps) = edits.steps {
+        ticket.steps = steps;
+        edited = true;
+    }
+    if let Some(e) = edits.expected {
+        ticket.expected = non_empty(Some(e));
+        edited = true;
+    }
+    if let Some(a) = edits.actual {
+        ticket.actual = non_empty(Some(a));
+        edited = true;
+    }
+    if edited {
+        db::update_ticket_fields(&state.pool, &ticket).await?;
     }
     let site = db::find_site(&state.pool, ticket.site_id).await?.ok_or(AppError::NotFound)?;
     let conversation = match ticket.conversation_id {

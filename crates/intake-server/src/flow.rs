@@ -3,8 +3,7 @@
 
 use intake_core::{
     advance, fallback_triage, parse_persona, parse_triage, persona_messages, resolve_duplicate,
-    triage_messages, Extracted, PersonaCtx, PersonaReply, Role, State, StateHint, TriageCtx, Turn,
-    VisitorInput,
+    triage_messages, PersonaCtx, PersonaReply, Role, State, StateHint, TriageCtx, Turn, VisitorInput,
 };
 use serde::Serialize;
 use serde_json::json;
@@ -31,10 +30,12 @@ pub struct StartResponse {
     pub token: String,
 }
 
+/// Wire shape of the public API (`state` is the bare label; the question count rides along).
 #[derive(Debug, Serialize)]
 pub struct MessageResponse {
     pub reply: String,
-    pub state: State,
+    pub state: &'static str,
+    pub asked: u8,
     pub redactions: std::collections::BTreeMap<String, u32>,
     pub done: bool,
     pub ticket_id: Option<i64>,
@@ -43,7 +44,7 @@ pub struct MessageResponse {
 #[derive(Debug, Serialize)]
 pub struct EndResponse {
     pub ticket_id: Option<i64>,
-    pub state: State,
+    pub state: &'static str,
 }
 
 pub struct StartMeta<'a> {
@@ -132,7 +133,8 @@ pub async fn visitor_message(
         let ticket_id = triage(state, &conv).await?;
         return Ok(MessageResponse {
             reply: "Thanks, we've got it. We read every one.".into(),
-            state: State::Triaged,
+            state: State::Triaged.label(),
+            asked: conv.state.asked(),
             redactions: Default::default(),
             done: true,
             ticket_id: Some(ticket_id),
@@ -189,7 +191,8 @@ pub async fn visitor_message(
 
     let mut out = MessageResponse {
         reply: reply_text,
-        state: next,
+        state: next.label(),
+        asked: next.asked(),
         redactions: scrubbed.redactions,
         done: false,
         ticket_id: None,
@@ -197,7 +200,7 @@ pub async fn visitor_message(
     if next == State::Closing {
         let refreshed = db::load_conversation(&state.pool, id).await?.ok_or(AppError::NotFound)?;
         out.ticket_id = Some(triage(state, &refreshed).await?);
-        out.state = State::Triaged;
+        out.state = State::Triaged.label();
         out.done = true;
     }
     Ok(out)
@@ -222,15 +225,15 @@ pub async fn end(state: &AppState, id: Uuid, token: &str) -> AppResult<EndRespon
     let conv = authed(state, id, token).await?;
     if conv.state == State::Triaged {
         let ticket_id = db::ticket_for_conversation(&state.pool, id).await?;
-        return Ok(EndResponse { ticket_id, state: State::Triaged });
+        return Ok(EndResponse { ticket_id, state: State::Triaged.label() });
     }
     if db::count_visitor_messages(&state.pool, id).await? == 0 {
         db::update_conversation(&state.pool, id, State::Triaged, &conv.extracted, true).await?;
         db::audit(&state.pool, "visitor", "conversation.ended_empty", &subject(id), json!({})).await?;
-        return Ok(EndResponse { ticket_id: None, state: State::Triaged });
+        return Ok(EndResponse { ticket_id: None, state: State::Triaged.label() });
     }
     let ticket_id = triage(state, &conv).await?;
-    Ok(EndResponse { ticket_id: Some(ticket_id), state: State::Triaged })
+    Ok(EndResponse { ticket_id: Some(ticket_id), state: State::Triaged.label() })
 }
 
 /// Triage a conversation into a draft ticket: FTS candidates → prompt → strict parse (retry
@@ -297,9 +300,4 @@ async fn triage(state: &AppState, conv: &ConversationRow) -> AppResult<i64> {
     db::audit(&state.pool, "system", "conversation.triaged", &subject(id), json!({ "ticket": ticket_id }))
         .await?;
     Ok(ticket_id)
-}
-
-/// Exposed for the admin takedown path.
-pub fn extracted_of(conv: &ConversationRow) -> &Extracted {
-    &conv.extracted
 }

@@ -112,6 +112,24 @@ impl State {
         }
     }
 
+    /// The wire name clients see: `open | clarifying | closing | triaged` (no count).
+    pub fn label(self) -> &'static str {
+        match self {
+            State::Open => "open",
+            State::Clarifying { .. } => "clarifying",
+            State::Closing => "closing",
+            State::Triaged => "triaged",
+        }
+    }
+
+    /// Follow-up questions asked so far (0 outside `Clarifying`).
+    pub fn asked(self) -> u8 {
+        match self {
+            State::Clarifying { asked } => asked,
+            _ => 0,
+        }
+    }
+
     /// The visitor may still send messages.
     pub fn accepts_messages(self) -> bool {
         matches!(self, State::Open | State::Clarifying { .. })
@@ -239,4 +257,31 @@ pub struct Message {
 pub struct Turn {
     pub role: Role,
     pub text: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn state_column_roundtrip_and_labels() {
+        for s in [State::Open, State::Clarifying { asked: 2 }, State::Closing, State::Triaged] {
+            assert_eq!(State::parse_column(&s.to_column()), Ok(s));
+        }
+        assert_eq!(State::Clarifying { asked: 3 }.label(), "clarifying");
+        assert_eq!(State::Clarifying { asked: 3 }.asked(), 3);
+        assert_eq!(State::Triaged.asked(), 0);
+        assert!(State::parse_column("clarifying:x").is_err());
+        assert!(State::parse_column("weird").is_err());
+    }
+
+    #[test]
+    fn extracted_merge_prefers_newer_non_empty_values() {
+        let old = Extracted { kind_hint: Some(Kind::Bug), doing: Some("a".into()), ..Default::default() };
+        let new = Extracted { doing: Some("  ".into()), expected: Some("b".into()), ..Default::default() };
+        let m = old.merge(&new);
+        assert_eq!(m.kind_hint, Some(Kind::Bug));
+        assert_eq!(m.doing.as_deref(), Some("a"), "blank does not overwrite");
+        assert_eq!(m.expected.as_deref(), Some("b"));
+    }
 }

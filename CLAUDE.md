@@ -7,8 +7,9 @@ Feedback-intake persona: widget + Rust server + owner console. Read `docs/archit
 - Rust workspace: `crates/intake-core` (pure, no I/O, no async) and `crates/intake-server`
   (axum 0.8, tokio, sqlx 0.9/Postgres, reqwest, veilkit-core as a git dependency pinned to a commit).
   Decisions and deviations from the spec: `docs/decisions.md`. Deploy: `docs/deploy.md`.
-- `widget/`: TypeScript, Vite library build (IIFE), shadow DOM, lazy-loads Veilkit WASM from the
-  sibling checkout `../veilkit/npm` until Veilkit is published.
+- `widget/`: TypeScript, Vite library build (IIFE), shadow DOM, lazy-loads a vendored Veilkit
+  `wasm-pack --target web` build from `widget/vendor/veilkit/` (regenerate with
+  `pnpm -C widget build:veilkit`); switch to the npm package when Veilkit publishes.
 - `console/`: TypeScript + React + Vite, served by the server under `/console`.
 - Prompts are Markdown in `prompts/`, loaded at startup; never inline prompts in code.
 
