@@ -7,16 +7,13 @@
   "scripts": {
     "dev": "node mock/server.mjs",
     "build": "vite build && vite build -c vite.veilkit.config.ts",
-    "build:veilkit": "cd ../../veilkit/crates/veilkit-wasm && wasm-pack build --release --target web --out-dir ../../../intake/widget/vendor/veilkit --out-name veilkit && rm -f ../../../intake/widget/vendor/veilkit/.gitignore",
+    "build:veilkit": "OUT=$PWD/vendor/veilkit && cd ${VEILKIT_DIR:-../../veilkit}/crates/veilkit-wasm && wasm-pack build --release --target web --out-dir \"$OUT\" --out-name veilkit && rm -f \"$OUT/.gitignore\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src test e2e mock",
     "test": "vitest run && pnpm run test:e2e",
     "test:unit": "vitest run",
     "test:e2e": "pnpm run build && node --test \"e2e/*.test.mjs\"",
     "size": "node --test e2e/size.test.mjs"
-  },
-  "dependencies": {
-    "veilkit": "link:../../veilkit/npm"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
