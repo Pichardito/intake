@@ -1,0 +1,13 @@
+```json
+{
+  "kind": "bug",
+  "title": "CSV export returns a server error",
+  "summary": "Exporting the invoices table to CSV fails with a server error after clicking Export.",
+  "steps": ["Open Invoices", "Click Export", "Choose CSV"],
+  "expected": "A CSV file downloads",
+  "actual": "A red 'something went wrong' banner",
+  "severity": "high",
+  "confidence": 0.86,
+  "duplicate_of": null
+}
+```

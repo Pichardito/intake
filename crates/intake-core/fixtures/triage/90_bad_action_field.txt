@@ -1,0 +1,1 @@
+{"kind":"bug","title":"x","summary":"y","severity":"low","confidence":0.5,"actions":[{"type":"open_pull_request","repo":"owner/repo"}]}

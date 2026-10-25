@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select kind, status, confidence, duplicate_of, github_issue_url from tickets where id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "confidence",
+        "type_info": "Float4",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "confidence"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "duplicate_of",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "duplicate_of"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "github_issue_url",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "github_issue_url"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "301d459487ae1e25152205ae750df3ae0eeb7e93de7754fa336cff6baf76670c"
+}

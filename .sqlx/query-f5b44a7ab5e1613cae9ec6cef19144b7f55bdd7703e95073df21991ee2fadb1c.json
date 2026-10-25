@@ -1,0 +1,92 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into sites (key, name, product_blurb, origin_allowlist, github_repo)\n           values ($1, $2, $3, $4, $5)\n           returning id, key, name, product_blurb, origin_allowlist, github_repo",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "sites",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "sites",
+            "name": "key"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "sites",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "product_blurb",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "sites",
+            "name": "product_blurb"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "origin_allowlist",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "sites",
+            "name": "origin_allowlist"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "github_repo",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "sites",
+            "name": "github_repo"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "TextArray",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "f5b44a7ab5e1613cae9ec6cef19144b7f55bdd7703e95073df21991ee2fadb1c"
+}

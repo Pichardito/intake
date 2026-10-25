@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into tickets (site_id, kind, title, summary, severity, confidence, status)\n           values ($1, 'bug', 'CSV export fails with server error', 'Exporting invoices to CSV shows a server error', 'high', 0.9, 'approved')\n           returning id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b3adee79b45abbb227c9a32280d6056d13ec6b300f1c7500a7959120653fc708"
+}

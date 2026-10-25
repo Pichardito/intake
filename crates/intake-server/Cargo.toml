@@ -1,0 +1,47 @@
+[package]
+name = "intake-server"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+publish = false
+description = "intake HTTP server: public conversation API, admin queue API, GitHub bridge"
+
+[[bin]]
+name = "intake-server"
+path = "src/main.rs"
+
+[dependencies]
+intake-core = { path = "../intake-core" }
+veilkit-core = { git = "https://github.com/Pichardito/veilkit", rev = "715d122cf5f0bff0f30559bdae1fc7763600c285" }
+
+axum = { version = "0.8", features = ["macros", "json"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal", "net", "fs", "sync", "time"] }
+tower = { version = "0.5", features = ["util", "limit"] }
+tower-http = { version = "0.7", features = ["cors", "trace", "limit", "fs", "set-header"] }
+sqlx = { version = "0.9", default-features = false, features = ["runtime-tokio", "tls-rustls", "postgres", "migrate", "macros", "uuid", "time", "json"] }
+reqwest = { version = "0.13", features = ["json"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+anyhow = "1"
+async-trait = "0.1"
+governor = "0.10"
+argon2 = "0.5"
+rand = "0.9"
+hmac = "0.12"
+sha2 = "0.10"
+base64 = "0.22"
+subtle = "2"
+uuid = { version = "1", features = ["v4", "serde"] }
+time = { version = "0.3", features = ["serde", "formatting", "parsing"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+clap = { version = "4", features = ["derive", "env"] }
+dotenvy = "0.15"
+http = "1"
+
+[dev-dependencies]
+wiremock = "0.6"
+http-body-util = "0.1"

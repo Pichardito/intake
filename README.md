@@ -16,3 +16,19 @@ The model proposes; a human disposes. Nothing with a side effect runs without an
 
 Design: `docs/architecture.md`. Build contract: `docs/phase2-spec.md`. Working codename; the public
 name is decided later. Apache-2.0.
+
+## Status
+
+- `crates/intake-core` and `crates/intake-server`: built, tested (unit + `sqlx::test` integration
+  against Postgres, hostile-input corpus, stubbed GitHub OAuth and issue bridge). See
+  `docs/decisions.md` for the calls made and what is left out, `docs/deploy.md` to run it on
+  Fly.io + Neon, or `docker/compose.yml` to self-host.
+- `widget/` and `console/`: in progress on a separate branch.
+
+## Run the server locally
+
+```bash
+cp .env.example .env            # fill the required values
+cargo run -p intake-server -- admin add-site --key demo --name Demo --origin http://localhost:5173 --repo owner/repo
+cargo run -p intake-server      # http://localhost:8788/v1/health
+```

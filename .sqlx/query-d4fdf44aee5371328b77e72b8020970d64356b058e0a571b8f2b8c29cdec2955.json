@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update tickets\n           set status = $2, github_issue_url = coalesce($3, github_issue_url), decided_reason = $4,\n               duplicate_of = coalesce($5, duplicate_of), decided_at = now()\n           where id = $1 and status = 'draft'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d4fdf44aee5371328b77e72b8020970d64356b058e0a571b8f2b8c29cdec2955"
+}
