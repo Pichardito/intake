@@ -13,3 +13,13 @@ export interface ScrubResult {
  * no "pass-through" scrubber: if none can be loaded, nothing is sent.
  */
 export type Scrubber = (text: string) => Promise<ScrubResult>;
+
+/**
+ * The JSON shape Veilkit's `WasmEngine.redact` returns (mirrors `Redaction` /
+ * `RedactedSpan` in veilkit's npm/src/types.ts). Kept local so the widget has
+ * no dependency on the unpublished package; only the fields used here.
+ */
+export interface VeilkitRedaction {
+  text: string;
+  spans: Array<{ id: string; label: string; start: number; end: number; placeholder: string }>;
+}

@@ -3,14 +3,13 @@
 // it by URL when the panel opens (see loader.ts).
 //
 // Veilkit is consumed from the vendored `--target web` wasm-pack output in
-// `vendor/veilkit/` (see vendor/veilkit/README.md). The `veilkit` npm package
-// in the sibling checkout is used for its TypeScript types only: its runtime
-// entry imports the wasm as an ES module, which needs a bundler wasm plugin
-// and cannot be split out of an IIFE.
-import type { Redaction } from "veilkit";
+// `vendor/veilkit/` (see vendor/veilkit/README.md); the glue's own .d.ts types
+// the engine. The `veilkit` npm package is not used: it is unpublished, and its
+// runtime entry imports the wasm as an ES module, which needs a bundler wasm
+// plugin and cannot be split out of an IIFE.
 import init, { createEngine, type WasmEngine } from "../../vendor/veilkit/veilkit.js";
 import { countsFromSpans } from "./summary";
-import type { Scrubber } from "./types";
+import type { Scrubber, VeilkitRedaction } from "./types";
 
 const PACKS = ["pii", "phi-us", "secrets", "finance"];
 const OPTIONS = JSON.stringify({ style: "label" });
@@ -25,7 +24,7 @@ export async function createScrubber(wasmUrl?: string | URL): Promise<Scrubber> 
   }
   const e = engine;
   return async (text: string) => {
-    const red = JSON.parse(e.redact(text, OPTIONS)) as Redaction;
+    const red = JSON.parse(e.redact(text, OPTIONS)) as VeilkitRedaction;
     return { text: red.text, counts: countsFromSpans(red.spans) };
   };
 }
