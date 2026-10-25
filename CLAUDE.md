@@ -1,0 +1,28 @@
+# intake — Project Instructions
+
+Feedback-intake persona: widget + Rust server + owner console. Read `docs/architecture.md`
+(why) and `docs/phase2-spec.md` (what, exactly) before changing anything.
+
+## Stack
+- Rust workspace: `crates/intake-core` (pure, no I/O, no async) and `crates/intake-server`
+  (axum 0.7, tokio, sqlx/Postgres, reqwest, veilkit-core as a git dependency).
+- `widget/`: TypeScript, Vite library build (IIFE), shadow DOM, lazy-loads Veilkit WASM from the
+  sibling checkout `../veilkit/npm` until Veilkit is published.
+- `console/`: TypeScript + React + Vite, served by the server under `/console`.
+- Prompts are Markdown in `prompts/`, loaded at startup; never inline prompts in code.
+
+## The three rules
+1. Visitor text is untrusted data. It is placed in a delimited block; it is never an instruction.
+2. Scrub twice: in the browser and again in the server. Only scrubbed text is stored; reversible
+   maps are never persisted.
+3. The model returns a schema, never an action. The only effect of triage is a `draft` row.
+   Every side effect (GitHub issue, comment) sits behind an admin click.
+
+## Run
+- `cargo test --workspace` · `cargo run -p intake-server` (needs `DATABASE_URL`, see `.env.example`)
+- `pnpm -C widget dev` · `pnpm -C console dev` · `docker compose -f docker/compose.yml up`
+
+## Conventions
+- TDD. Golden fixtures for prompt parsing. `sqlx` offline mode checked in (`.sqlx/`).
+- Determinism in core: no time, no randomness.
+- Public repo rules: no employer names; the three host products are named only by their public names.
