@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select state from conversations where id = $1::uuid",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "state"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9d962dd30fba7ff3f94ee785297c12ec03fd8360654912ee9b93a0eed9eb4d30"
+}

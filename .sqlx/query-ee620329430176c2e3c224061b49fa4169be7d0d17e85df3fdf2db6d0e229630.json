@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select id, role, text_scrubbed, redactions_json, created_at\n           from messages where conversation_id = $1 order by id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "messages",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "role",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "messages",
+            "name": "role"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "text_scrubbed",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "messages",
+            "name": "text_scrubbed"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "redactions_json",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "messages",
+            "name": "redactions_json"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "messages",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ee620329430176c2e3c224061b49fa4169be7d0d17e85df3fdf2db6d0e229630"
+}

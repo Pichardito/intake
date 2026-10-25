@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update conversations\n           set state = $2, extracted = $3,\n               ended_at = case when $4 then coalesce(ended_at, now()) else ended_at end\n           where id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Jsonb",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b7f7ee7d308b781e28695a28c51e3dafc879cf40657ce885946137c65c26e7c1"
+}

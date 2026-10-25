@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select status, github_issue_url, decided_at from tickets where id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "github_issue_url",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "github_issue_url"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "decided_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "decided_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "452ad44d9177ac9c68f7897c8fcc23b006bd3e69f06020ebc8410863fd198744"
+}

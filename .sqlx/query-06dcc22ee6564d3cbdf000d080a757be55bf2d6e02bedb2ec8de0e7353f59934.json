@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select actor from audit where action = 'admin.login_refused'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "actor",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "audit",
+            "name": "actor"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "06dcc22ee6564d3cbdf000d080a757be55bf2d6e02bedb2ec8de0e7353f59934"
+}

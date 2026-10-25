@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select status, duplicate_of, github_issue_url from tickets where id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "duplicate_of",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "duplicate_of"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "github_issue_url",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "github_issue_url"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "32fb5fd8dbe980977ddc28697efa991265c3326c1a041d77770301e496389953"
+}

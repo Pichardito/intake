@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select duplicate_of, confidence from tickets where id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "duplicate_of",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "duplicate_of"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "confidence",
+        "type_info": "Float4",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "confidence"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      true,
+      false
+    ]
+  },
+  "hash": "0effe3ac6495d1f3f4294ff9539fedc2d6cc4991b8dc9af33337daded87bb1b3"
+}

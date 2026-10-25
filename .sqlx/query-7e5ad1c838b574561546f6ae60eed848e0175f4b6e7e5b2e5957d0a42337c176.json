@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select origin_allowlist from sites",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "origin_allowlist",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "sites",
+            "name": "origin_allowlist"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "7e5ad1c838b574561546f6ae60eed848e0175f4b6e7e5b2e5957d0a42337c176"
+}

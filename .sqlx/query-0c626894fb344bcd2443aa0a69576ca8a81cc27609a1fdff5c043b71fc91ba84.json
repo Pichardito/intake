@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select actor from audit where action = 'ticket.approved'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "actor",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "audit",
+            "name": "actor"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "0c626894fb344bcd2443aa0a69576ca8a81cc27609a1fdff5c043b71fc91ba84"
+}
