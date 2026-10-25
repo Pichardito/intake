@@ -1,0 +1,38 @@
+# Self-hosting: server + Postgres. Copy .env.example to .env and fill the secrets first.
+#   docker compose -f docker/compose.yml up --build
+#   docker compose -f docker/compose.yml run --rm server admin add-site --key demo --name Demo \
+#       --origin http://localhost:5173 --repo owner/repo
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: intake
+      POSTGRES_PASSWORD: intake
+      POSTGRES_DB: intake
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U intake -d intake"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_URL: postgres://intake:intake@postgres:5432/intake
+      PORT: "8788"
+      TRUST_PROXY: "false"
+    ports:
+      - "8788:8788"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
