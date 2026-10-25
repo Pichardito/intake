@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select role from messages where conversation_id = $1::uuid order by id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "role",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "messages",
+            "name": "role"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "084a7a4b008805fbd22dc3ed5723d9a5c2023a09ce0613ac61d265833e47eb54"
+}

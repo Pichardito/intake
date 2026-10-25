@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update tickets set status = 'approved', github_issue_url = 'https://github.com/owner/repo/issues/42' where id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "027e31e1bbf2ec37dba1f2a171af2175e182c7b5e07a7c2fd1c56c7a2c72cbea"
+}

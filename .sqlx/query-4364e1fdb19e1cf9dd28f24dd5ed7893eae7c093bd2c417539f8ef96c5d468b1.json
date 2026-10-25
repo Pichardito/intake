@@ -1,0 +1,54 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select id, title, summary\n           from tickets\n           where site_id = $1 and status in ('draft', 'approved')\n             and fts @@ to_tsquery('english', $2)\n           order by ts_rank(fts, to_tsquery('english', $2)) desc, id desc\n           limit $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "summary",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "summary"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "4364e1fdb19e1cf9dd28f24dd5ed7893eae7c093bd2c417539f8ef96c5d468b1"
+}
