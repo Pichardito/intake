@@ -1,0 +1,24 @@
+{
+  "name": "veilkit-wasm",
+  "type": "module",
+  "collaborators": [
+    "Carlos Pichardo"
+  ],
+  "description": "WebAssembly bindings for veilkit-core (npm package `veilkit`)",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pichardito/veilkit"
+  },
+  "files": [
+    "veilkit_bg.wasm",
+    "veilkit.js",
+    "veilkit.d.ts"
+  ],
+  "main": "veilkit.js",
+  "types": "veilkit.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
