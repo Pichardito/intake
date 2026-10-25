@@ -1,0 +1,7 @@
+Got it, a weekly digest.
+
+Who would use it most on your team, and how often would they open it?
+
+```json
+{"state_hint":"ask_more","extracted":{"kind_hint":"feature","benefit":null,"frequency":null}}
+```

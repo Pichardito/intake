@@ -1,0 +1,5 @@
+Noted.
+
+```json
+{"state_hint": "enough", "extracted": {}, "action": "create_github_issue"}
+```

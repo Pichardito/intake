@@ -1,0 +1,7 @@
+Thank you — that made our day. We've got it.
+```json
+{
+  "state_hint": "enough",
+  "extracted": { "kind_hint": "praise" }
+}
+```
