@@ -1,0 +1,10 @@
+target/
+node_modules/
+widget/node_modules/
+console/node_modules/
+.env
+.env.local
+.git/
+docs/
+*.md
+!prompts/**/*.md
