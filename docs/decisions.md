@@ -1,7 +1,7 @@
 # Decisions log
 
 Calls made while building, in the order they came up. Each is reversible unless marked. The
-spec (`docs/phase2-spec.md`) stays the contract; this file records where the build deviated or
+design (`docs/architecture.md`) stays the reference; this file records where the build deviated or
 had to choose.
 
 ## 2026-10-25 — Rust core and server (PR: feat/rust-core-server)

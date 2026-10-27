@@ -1,4 +1,4 @@
-// HTTP client for the public conversation API (phase2-spec §3.3).
+// HTTP client for the public conversation API (see docs/architecture.md §3).
 // Everything that crosses this boundary has already been scrubbed.
 
 export type ConversationState = "open" | "clarifying" | "closing" | "triaged";

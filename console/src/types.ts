@@ -1,4 +1,4 @@
-// Shapes returned by the admin API (phase2-spec §3.3 / §5.2). Mirrored by widget/mock.
+// Shapes returned by the admin API (see docs/architecture.md §3–4). Mirrored by widget/mock.
 export type Kind = "bug" | "feature" | "feedback" | "praise" | "noise";
 export type Severity = "low" | "medium" | "high";
 export type TicketStatus = "draft" | "approved" | "merged" | "dismissed";

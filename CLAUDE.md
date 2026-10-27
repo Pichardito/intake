@@ -1,7 +1,7 @@
 # intake — Project Instructions
 
 Feedback-intake persona: widget + Rust server + owner console. Read `docs/architecture.md`
-(why) and `docs/phase2-spec.md` (what, exactly) before changing anything.
+(design) and `docs/decisions.md` (what was actually built) before changing anything.
 
 ## Stack
 - Rust workspace: `crates/intake-core` (pure, no I/O, no async) and `crates/intake-server`
@@ -33,4 +33,4 @@ Feedback-intake persona: widget + Rust server + owner console. Read `docs/archit
 ## Conventions
 - TDD. Golden fixtures for prompt parsing. `sqlx` offline mode checked in (`.sqlx/`).
 - Determinism in core: no time, no randomness.
-- Public repo rules: no employer names; the three host products are named only by their public names.
+- Public repo rules: no employer names; host products are referred to only by their public names.

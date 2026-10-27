@@ -7,7 +7,7 @@ export interface IssuePreview {
 }
 
 /**
- * The GitHub issue the server will create on approve (phase2-spec §3.6),
+ * The GitHub issue the server will create on approve (see docs/architecture.md §3, GitHub bridge),
  * rendered from the owner's edited fields so the preview is what ships.
  * The server remains the source of truth; this is a faithful copy for review.
  */

@@ -1,4 +1,4 @@
-// Admin API client (phase2-spec §3.3, admin routes). Same-origin: the console
+// Admin API client (admin routes; see docs/architecture.md §3). Same-origin: the console
 // is served by intake-server under /console and authenticates with the
 // session cookie set by GitHub OAuth. A 401 means "go log in".
 import type { QueueFilters, QueueResponse, Ticket, TicketDetail, TriageFields } from "./types";

@@ -1,7 +1,7 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-// Served by intake-server under /console (phase2-spec §3.3), so every asset
+// Served by intake-server under /console (see docs/architecture.md §3), so every asset
 // URL is rooted there. In dev, /admin/* is proxied to the mock API
 // (`pnpm -C widget dev`, port 8787) or to a real server via INTAKE_API.
 export default defineConfig({

@@ -14,7 +14,7 @@ The model proposes; a human disposes. Nothing with a side effect runs without an
 - `console/` — React queue for the owner.
 - `prompts/` — the persona and triage prompts, versioned with the code.
 
-Design: `docs/architecture.md`. Build contract: `docs/phase2-spec.md`. Working codename; the public
+Design: `docs/architecture.md`. Decisions: `docs/decisions.md`. Working codename; the public
 name is decided later. Apache-2.0.
 
 ## Status

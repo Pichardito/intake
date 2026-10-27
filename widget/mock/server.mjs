@@ -1,4 +1,4 @@
-// Tiny in-memory mock of the intake-server API (docs/phase2-spec.md §3.3).
+// Tiny in-memory mock of the intake-server API (see docs/architecture.md §3).
 // Used by the widget and console tests and by `pnpm dev` in both packages
 // until the Rust server exists. Node only, no dependencies.
 //
