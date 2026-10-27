@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node mock/server.mjs",
     "build": "vite build && vite build -c vite.veilkit.config.ts",
-    "build:veilkit": "OUT=$PWD/vendor/veilkit && cd ${VEILKIT_DIR:-../../veilkit}/crates/veilkit-wasm && wasm-pack build --release --target web --out-dir \"$OUT\" --out-name veilkit && rm -f \"$OUT/.gitignore\"",
+    "build:veilkit": "OUT=$PWD/vendor/veilkit && cd ${VEILKIT_DIR:-../../veilkit}/crates/veilkit-wasm && CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUSTFLAGS=\"-C panic=abort -C opt-level=z --remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=$HOME=/home --remap-path-prefix=$(cd ../.. && pwd)=/veilkit\" wasm-pack build --release --target web --out-dir \"$OUT\" --out-name veilkit && rm -f \"$OUT/.gitignore\" && if strings \"$OUT/veilkit_bg.wasm\" | grep -q \"$HOME\"; then echo 'vendored wasm embeds a home path' >&2; exit 1; fi",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src test e2e mock",
     "test": "vitest run && pnpm run test:e2e",
